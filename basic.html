@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <link rel="stylesheet" type="text/css" href="./css/main.css">
+    <!-- 引入 echarts.js -->
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/walden.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/extension/dataTool.min.js"></script>
+    <!-- <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts.min.js"></script> -->
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 600px;height:400px;"></div>
+<div id="tool-panel">
+    <div id="theme">
+        <a title="default" class="default selected" data-original-title="default"><span></span></a>
+        <a title="light" class="light" data-original-title="light"><span></span></a>
+        <a title="dark" class="dark" data-original-title="dark"><span></span></a>
+    </div>
+</div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'default');
+    // var myChart = echarts.init(document.getElementById('main'), 'dark');
+    // var myChart = echarts.init(document.getElementById('main'), 'dark');
+    // 过渡--------------------- 加载提示
+
+    // 过渡---------------------
+    myChart.showLoading({
+        text: '正在努力的读取数据中...',    //loading话术
+    });
+
+    // ajax getting data...............
+
+    // ajax callback
+    myChart.hideLoading();
+
+    // 图表使用-------------------
+    var option = {
+        legend: {                                   // 图例配置
+            padding: 5,                             // 图例内边距，单位px，默认上下左右内边距为5
+            itemGap: 10,                            // Legend各个item之间的间隔，横向布局时为水平间隔，纵向布局时为纵向间隔
+            data: ['ios', 'android']
+        },
+        tooltip: {                                  // 气泡提示配置
+            trigger: 'item',                        // 触发类型，默认数据触发，可选为：'axis'
+        },
+        xAxis: [                                    // 直角坐标系中横轴数组
+            {
+                type: 'category',                   // 坐标轴类型，横轴默认为类目轴，数值轴则参考yAxis说明
+                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            }
+        ],
+        yAxis: [                                    // 直角坐标系中纵轴数组
+            {
+                type: 'value',                      // 坐标轴类型，纵轴默认为数值轴，类目轴则参考xAxis说明
+                boundaryGap: [0.1, 0.1],            // 坐标轴两端空白策略，数组内数值代表百分比
+                splitNumber: 4                      // 数值轴用，分割段数，默认为5
+            }
+        ],
+        series: [
+            {
+                name: 'ios',                        // 系列名称
+                type: 'line',                       // 图表类型，折线图line、散点图scatter、柱状图bar、饼图pie、雷达图radar
+                data: [112, 23, 45, 56, 233, 343, 454, 89, 343, 123, 45, 123]
+            },
+            {
+                name: 'android',                    // 系列名称
+                type: 'bar',                       // 图表类型，折线图line、散点图scatter、柱状图bar、饼图pie、雷达图radar
+                data: [45, 123, 145, 526, 233, 343, 44, 829, 33, 123, 45, 13]
+            }
+        ]
+    };
+    myChart.setOption(option);
+
+
+    // 增加些数据------------------
+    option.legend.data.push('win');
+    option.series.push({
+        name: 'win',                            // 系列名称
+        type: 'line',                           // 图表类型，折线图line、散点图scatter、柱状图bar、饼图pie、雷达图radar
+        data: [13, 34, 2, 12, 345, 234, 123, 56, 23, 56, 36, 57]
+    });
+    myChart.setOption(option);
+
+
+    // 图表清空-------------------
+    // myChart.clear();
+
+    // 图表释放-------------------
+    // myChart.dispose();
+
+
+    $('#theme a').click(function () {
+        var theme = $(this).data('original-title');
+        myChart.dispose();
+        myChart = echarts.init(document.getElementById('main'), theme);
+        myChart.setOption(option);
+        $(this).parent().find('.selected').removeClass('selected')
+        $(this).addClass('selected')
+    })
+
+
+</script>
+</body>
+</html>

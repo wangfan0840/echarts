@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="./js/echarts.min.js"></script>
+    <script src="./js/jquery.min.js"></script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="width: 100%;height:400px;"></div>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'walden');
+
+    function initMutiJsonData(data, chart) {
+
+        var selected = {}; //存储选中的状态
+        var ydata = data.legendData;
+        var vdata = data.yAxisData;
+        var series = [];
+        var sumData = data.totals;
+        $.each(vdata, function (i, v) {
+
+            var bs = {
+                name: ydata[i],
+                type: 'bar',
+                smooth: true,
+                areaStyle: {
+                    normal: {}
+                },
+                data: v,
+                // label: {
+                //     normal: {
+                //         show: true,
+                //         textStyle: {color: "#991e30"},
+                //         position: 'bottom'
+                //     }
+                // },
+                barWidth: '40%',
+                stack: '用户数'
+            };
+            series.push(bs);
+
+        });
+
+        var bs2 = {
+            name: '用户数',
+            type: 'line',
+            data: sumData,
+            label: {
+                normal: {
+                    show: true,
+                    textStyle: {color: "#000000"},
+                    position: 'top'
+                }
+            },
+            lineStyle: {
+                normal: {
+                    color: "none"
+                }
+            },
+            markPoint: {
+                data: [
+                    {
+                        type: 'max',
+                        name: '最大值'
+                    },
+                    {
+                        type: 'min',
+                        name: '最小值'
+                    }
+                ]
+            },
+            markLine: {
+                lineStyle: {
+                    normal: {
+                        color: '#2947fc'
+                    }
+                },
+                label: {
+                    normal: {
+                        position: 'end'
+                    }
+                },
+                data: [{
+                    name: '平均',
+                    type: 'average',
+                    label: {
+                        show: true,
+                        formatter: '{b}: {c}'
+                    }
+                }]
+            }
+        };
+        series.push(bs2);
+
+        var option = {
+            //标题组件
+            title: {
+                text: data.title,
+                subtext: '样本数: ' + data.total,
+                top: '10',
+                borderWidth: 1,
+                borderColor: '#81cc2e',
+                textStyle: {
+                    //文字颜色
+                    color: '#ccc',
+                    //字体风格,'normal','italic','oblique'
+                    fontStyle: 'normal',
+                    //字体粗细 'normal','bold','bolder','lighter',100 | 200 | 300 | 400...
+                    fontWeight: 'bold',
+                    //字体系列
+                    fontFamily: 'sans-serif',
+                    //字体大小
+                    fontSize: 18
+                }
+
+            },
+            //图例组件
+            legend: {
+                data: data.legendData,
+                top: '6%',
+                right: '3%'
+            },
+            //调色盘颜色列表
+            color: [
+                '#d7bb92',
+                '#c3391a'
+            ],
+            //提示框组件
+            tooltip: {
+                // show:false,
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    crossStyle: {
+                        color: '#991e30'
+                    }
+                },
+                formatter: function (params) {
+                    params.pop(); //删除最后一个
+                    if (params[0]) {
+                        var res = params[0].name + '<br/>';
+                        for (var i = 0; i < params.length; i++) {
+                            res += (params[i].marker + params[i].seriesName + " : " + params[i].value + '<br/>');
+                        }
+                        return res;
+                    }
+                }
+            },
+
+            toolbox: {
+                show: true,
+                // orient:'vertical',
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: 'none'
+                    },
+                    mark: {show: true},
+                    dataView: {show: true, readOnly: false},
+                    magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            calculable: true,
+            xAxis: [
+                {
+                    type: 'category',
+                    axisLabel: {
+                        //设置成 0 强制显示所有标签
+                        interval: 0,
+                        rotate: 45,
+                        margin: 15
+                    },
+                    name: data.xAxisName,
+                    data: data.xAxisData,
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                }
+            ],
+            yAxis: [{
+                name: data.yAxisName,
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value} ' + (data.unit ? data.unit : '单')
+                },
+            }],
+
+            // 区域缩放组件
+            dataZoom: [
+                {
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    top: '93%',
+                    start: 1,
+
+                    end: 35
+                },
+                {
+                    type: 'slider',
+                    show: true,
+                    yAxisIndex: [0],
+                    left: '93%',
+                    start: 0,
+                    end: 100
+                },
+                {
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    start: 1,
+                    end: 35
+                },
+                {
+                    type: 'inside',
+                    yAxisIndex: [0],
+                    start: 0,
+                    end: 100
+                }
+            ],
+            grid: {
+                top: '90',
+                left: '3%',
+                right: '8%',
+                bottom: '4%',
+                containLabel: true
+            },
+            series: series
+        };
+
+        //保留一位小数
+        function toDecimal(num) {
+            return parseFloat(num).toFixed(1);
+        }
+
+        //捕捉变化状态
+        chart.on("legendselectchanged", function (params) {
+            selected = params.selected;
+
+            //重新计算sumData
+            $.each(vdata[0], function (i, v) { //0-9
+                var sum = 0;
+                //遍历对象
+                for (var key in selected) {
+                    if (selected[key]) { //获取被选中的元素
+                        var index = ydata.indexOf(key); //获取被选中key在ydata里的索引
+                        sum += vdata[index][i];
+                    }
+                }
+                sumData[i] = parseFloat(toDecimal(sum));
+
+            });
+            chart.setOption(option); //重新绘图
+
+        });
+        chart.on('click', function (params) {
+            // 控制台打印数据的名称
+            console.log(params.name);
+
+            if (params.componentType === 'markPoint') {
+                alert(' 点击到了 markPoint 上')
+
+            }
+
+
+        });
+
+        chart.setOption(option);
+
+
+    }
+
+    $.get('./json/data.json', function (res) {
+        if (res.code == 0) {
+            jsonData = eval('(' + res.data.result + ')');
+            initMutiJsonData(jsonData, myChart);
+        }
+
+    });
+
+
+</script>
+</body>
+</html>
